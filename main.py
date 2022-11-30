@@ -50,7 +50,7 @@ def create_blender_project(data_paths):
         const.SYSTEM_CONFIG_FILE_NAME, "SYSTEM", const.STR_OUT_FORMAT
     ).replace('"', "")
     # Transform .blend project to another format!
-    if outformat != ".blend":
+    if outformat != ".gltf":
         check_output(
             [
                 blender_install_path,
