@@ -28,7 +28,8 @@ SUPPORTED_BLENDER_FORMATS = (
     ".fbx",
     ".3ds",
 )
-BASE_FORMAT = ".blend"
+BASE_FORMAT = ".gltf"
+# BASE_FORMAT = ".blend"
 
 
 class MODE(Enum):
@@ -158,7 +159,8 @@ FEATURES = "FEATURES"
 # These values will be set in config file if config.ini is removed!
 DEFAULT_CALIBRATION_IMAGE_PATH = "Images/Calibrations/wallcalibration.png"
 DEFAULT_IMAGE_PATH = "Images/Examples/example.png"
-DEFAULT_OUT_FORMAT = ".blend"
+# DEFAULT_OUT_FORMAT = ".blend"
+DEFAULT_OUT_FORMAT = ".gltf"
 DEFAULT_OVERWRITE_DATA = "False"
 MAC_DEFAULT_BLENDER_INSTALL_PATH = "/Applications/Blender.app/Contents/MacOS/Blender"
 LINUX_DEFAULT_BLENDER_INSTALL_PATH = "/usr/local/blender/blender"
