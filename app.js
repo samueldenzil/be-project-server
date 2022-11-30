@@ -61,6 +61,18 @@ app.get("/hello", (req, res) => {
   res.status(200);
 });
 
+app.get("/", (req, res) => res.download(`${__dirname}/Target/floorplan.gltf`));
+
+app.get("/model", (req, res) => {
+  console.log("inside /model");
+  var file = fs.createReadStream(`${__dirname}/Target/floorplan.gltf`);
+  var stat = fs.statSync(`${__dirname}/Target/floorplan.gltf`);
+  res.setHeader("Content-Length", stat.size);
+  // res.setHeader('Content-Type', '')
+  res.setHeader("Content-Disposition", "attachment; filename=floorplan.gltf");
+  file.pipe(res);
+});
+
 const PORT = process.env.PORT || 4001;
 
 httpServer.listen(PORT, () => {
