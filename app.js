@@ -48,7 +48,7 @@ app.post("/upload", upload.single("image"), (req, res) => {
 
       console.log(`stdout: ${stdout}`);
       console.error(`stderr: ${stderr}`);
-      res.json({ msg: "Model Created", filename: req.file.filename });
+      res.json({ msg: "Model Created", filename: modelFilename });
     }
   );
 });
