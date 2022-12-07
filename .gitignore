@@ -140,3 +140,5 @@ Data/
 .ipynb_checkpoints
 
 node_modules
+/uploads
+/Target

@@ -10,7 +10,6 @@ from FloorplanToBlenderLib import (
 )  # floorplan to blender lib
 import os
 import sys
-from pathlib import Path
 
 """
 Create Blender Project from floorplan
@@ -50,7 +49,7 @@ def create_blender_project(data_paths):
         const.SYSTEM_CONFIG_FILE_NAME, "SYSTEM", const.STR_OUT_FORMAT
     ).replace('"', "")
     # Transform .blend project to another format!
-    if outformat != ".gltf":
+    if outformat != ".blend":
         check_output(
             [
                 blender_install_path,
@@ -93,26 +92,26 @@ if __name__ == "__main__":
     if auto_blender_install_path is not None:
         blender_install_path = auto_blender_install_path
 
-    print("Please enter your blender installation path [default = "
-        + blender_install_path
-        + "]: "
-    )
-    var = ""
-    # var = sys.argv[1]
     # var = input(
     #     "Please enter your blender installation path [default = "
     #     + blender_install_path
     #     + "]: "
     # )
+    print(
+        "Please enter your blender installation path [default = "
+        + blender_install_path
+        + "]: "
+    )
+    var = ""
     if var:
         blender_install_path = var
 
-    print("Do you want to build from StackingFile or ConfigFile list ? [default = ConfigFile]: ")
-    var = ""
-    # var = sys.argv[2]
     # var = input(
     #     "Do you want to build from StackingFile or ConfigFile list ? [default = ConfigFile]: "
     # )
+    print("Do you want to build from StackingFile or ConfigFile list ? [default = ConfigFile]: ")
+    var = ""
+
     if var in ["N", "n", "StackingFile", "stacking", "stackingfile"]:
         stacking_def_path = "./Stacking/all_separated_example.txt"
         var = input(f"Enter path to Stacking file : [default = {stacking_def_path}]: ")
@@ -129,20 +128,20 @@ if __name__ == "__main__":
             exit(0)
 
     else:
-        config_path = program_path + "/Configs/default.ini"
+
         # config_path = "./Configs/default.ini"
+        config_path = program_path + "/Configs/default.ini"
+        # var = input(
+        #     "Use default config or import from file paths separated by space [default = "
+        #     + config_path
+        #     + "]: "
+        # )
         print(
             "Use default config or import from file paths separated by space [default = "
             + config_path
             + "]: "
         )
         var = ""
-        # var = sys.argv[3]
-        # var = input(
-        #     "Use default config or import from file paths separated by space [default = "
-        #     + config_path
-        #     + "]: "
-        # )
 
         if var:
             config_path = var
@@ -153,12 +152,19 @@ if __name__ == "__main__":
         else:
             floorplans.append(floorplan.new_floorplan(config_path))
 
+        # var = input("Do you want to set images to use in each config file? [N/y]: ")
         print("Do you want to set images to use in each config file? [N/y]: ")
         var = "y"
-        # var = sys.argv[4]
-        # var = input("Do you want to set images to use in each config file? [N/y]: ")
         if var in ["y", "Y"]:
             for floorplan in floorplans:
+                # var = input(
+                #     "For config file "
+                #     + floorplan.conf
+                #     + " write path for image to use "
+                #     + "[Default="
+                #     + floorplan.image_path
+                #     + "]:"
+                # )
                 print(
                     "For config file "
                     + floorplan.conf
@@ -168,25 +174,16 @@ if __name__ == "__main__":
                     + "]:"
                 )
                 var = sys.argv[1]
-                # var = input(
-                #     "For config file "
-                #     + floorplan.conf
-                #     + " write path for image to use "
-                #     + "[Default="
-                #     + floorplan.image_path
-                #     + "]:"
-                # )
                 if var:  # TODO: test this
                     floorplan.image_path = var
         print("")
+        # var = input(
+        #     "This program is about to run and create blender3d project, continue? : "
+        # )
         print(
             "This program is about to run and create blender3d project, continue? : "
         )
         var = ""
-        # var = sys.argv[6]
-        # var = input(
-        #     "This program is about to run and create blender3d project, continue? : "
-        # )
         if var:
             print("Program stopped.")
             exit(0)
@@ -197,17 +194,16 @@ if __name__ == "__main__":
         print("Clean datafiles")
 
         print("")
+        # var = input("Clear all cached data before run: [default = yes] : ")
         print("Clear all cached data before run: [default = yes] : ")
         var = ""
-        # var = sys.argv[7]
-        # var = input("Clear all cached data before run: [default = yes] : ")
-
+        
         if not var or var.lower() == "yes" or var.lower() == "y":
             IO.clean_data_folder(data_folder)
 
         if len(floorplans) > 1:
             data_paths.append(execution.simple_single(f) for f in floorplans)
-        else:   
+        else:
             data_paths = [execution.simple_single(floorplans[0])]
 
     print("")

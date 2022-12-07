@@ -1,80 +1,66 @@
-const http = require("http");
-const path = require("path");
-const fs = require("fs");
-const { exec } = require("child_process");
-
 const express = require("express");
+const path = require("path");
+const multer = require("multer");
+const MethodOverride = require("method-override");
+const { exec } = require("child_process");
+// const { fileURLToPath } = require("url");
+// const __filename = fileURLToPath(import.meta.url);
+
+// const __dirname = path.dirname(__filename);
 
 const app = express();
-const httpServer = http.createServer(app);
 
-app.get("/", express.static(path.join(__dirname, "./public")));
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(MethodOverride("_method"));
 
-const multer = require("multer");
-
-const handleError = (err, res) => {
-  res.status(500).contentType("text/plain").end("Oops! Something went wrong!");
-};
-
-const upload = multer({
-  dest: `${__dirname}/uploads`,
+// Create storage engine
+const storage = multer.diskStorage({
+  destination: `${__dirname}/uploads`,
+  filename: (req, file, cb) => {
+    return cb(
+      null,
+      // `${file.fieldname}${path.extname(file.originalname)}`
+      `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
+    );
+  },
 });
 
-app.post(
-  "/upload",
-  upload.single("image" /* name attribute of <file> element in your form */),
-  (req, res) => {
-    console.log("inside upload");
-    const tempPath = req.file.path;
-    console.log(req.file);
-    const targetPath = path.join(__dirname, "./uploads/image.png");
+const upload = multer({ storage });
 
-    if (path.extname(req.file.originalname).toLowerCase() === ".png") {
-      fs.rename(tempPath, targetPath, (err) => {
-        if (err) return handleError(err, res);
-        exec(`sh ${__dirname}/main.sh`, (error, stdout, stderr) => {
-          if (error) {
-            console.error(`exec error: ${error}`);
-            return;
-          }
-          console.log(`stdout: ${stdout}`);
-          console.error(`stderr: ${stderr}`);
-          // res.sendFile(__dirname + "/Target/floorplan.blend");
-        });
-        res.status(200).contentType("text/plain").end("successful");
-      });
-    } else {
-      fs.unlink(tempPath, (err) => {
-        if (err) return handleError(err, res);
+// @route POST /upload
+// @desc Uploads image to the server
+app.post("/upload", upload.single("image"), (req, res) => {
+  console.log("inside /uploadImage");
+  let idx1 = req.file.filename.lastIndexOf("_");
+  let idx2 = req.file.filename.lastIndexOf(".");
+  let modelFilename =
+    "floorplan" + req.file.filename.substring(idx1, idx2) + ".glb";
+  exec(
+    `sh ${__dirname}/main.sh ${req.file.filename} ${modelFilename}`,
+    (error, stdout, stderr) => {
+      if (error) {
+        console.error(`exec error: ${error}`);
+        res.status(401).json({ err: error });
+        return;
+      }
 
-        res
-          .status(403)
-          .contentType("text/plain")
-          .end("Only .png files are allowed!");
-      });
+      console.log(`stdout: ${stdout}`);
+      console.error(`stderr: ${stderr}`);
+      res.json({ msg: "Model Created", filename: req.file.filename });
     }
-  }
-);
-
-app.get("/hello", (req, res) => {
-  console.log("hello world inside /hello");
-  res.status(200);
+  );
 });
 
-app.get("/", (req, res) => res.download(`${__dirname}/Target/floorplan.gltf`));
-
-app.get("/model", (req, res) => {
-  console.log("inside /model");
-  var file = fs.createReadStream(`${__dirname}/Target/floorplan.gltf`);
-  var stat = fs.statSync(`${__dirname}/Target/floorplan.gltf`);
-  res.setHeader("Content-Length", stat.size);
-  // res.setHeader('Content-Type', '')
-  res.setHeader("Content-Disposition", "attachment; filename=floorplan.gltf");
-  file.pipe(res);
+// @route GET /files/:filename
+// @desc Display a file
+app.get("/files/:filename", (req, res) => {
+  // console.log(req.params.filename);
+  res.sendFile(`${__dirname}/Target/${req.params.filename}`);
 });
 
-const PORT = process.env.PORT || 4001;
-
-httpServer.listen(PORT, () => {
-  console.log(`Server is listening on port ${PORT}`);
+const port = 4000;
+app.listen(port, () => {
+  console.log(`Server started on port ${port}`);
 });
